@@ -9,26 +9,28 @@ from langchain.memory import ConversationBufferMemory
 INDEX_DIR = "embeddings/faiss_index"
 
 def get_chain(vectorstore):
-    # Setup HuggingFace text-generation pipeline
+    # Setup HuggingFace text2text-generation pipeline with instruction-tuned model
     pipe = pipeline(
-        "text-generation",
-        model="gpt2",
-        max_new_tokens=256,
-        temperature=0.7,
-        do_sample=True,
+        "text2text-generation",
+        model="google/flan-t5-base",
+        max_length=512,
+        temperature=0,
+        do_sample=False,
     )
     llm = HuggingFacePipeline(pipeline=pipe)
 
-    # Conversation memory for multi-turn
+    # Conversation memory for multi-turn context
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
-    # Prompt template uses 'question' instead of 'query'
+    # Prompt template with clear instructions
     prompt_template = PromptTemplate(
         input_variables=["question", "context", "chat_history"],
         template=(
             "You are a helpful medical assistant.\n"
-            "Chat history:\n{chat_history}\n\n"
+            "Use the context below to answer the question clearly and concisely.\n"
+            "If the answer is not in the context, say you don't know.\n\n"
             "Context:\n{context}\n\n"
+            "Chat history:\n{chat_history}\n\n"
             "Question: {question}\n"
             "Answer:"
         ),
