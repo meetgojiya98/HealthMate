@@ -1,0 +1,7 @@
+streamlit
+pandas
+transformers
+torch
+faiss-cpu
+langchain
+langchain-community
